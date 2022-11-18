@@ -180,13 +180,15 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
 
     show_some(player_hand,dealer_hand)
 
+    if True:
+        pass
     #print(playing)
     while playing:  # recall this variable from our hit_or_stand function
 
         #STAND FUNCTION DOESNT WORK!
         #INFINITE LOOP IF WE WIN OR LOSE
         #Infinite loop at end when me and dealer bust. fix this
-
+        #just testing my push
         while True: # player plays
 
             if player_hand.value == 21:
