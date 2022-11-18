@@ -180,8 +180,8 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
 
     show_some(player_hand,dealer_hand)
 
-    if True:
-        pass
+    if False:
+        break
     #print(playing)
     while playing:  # recall this variable from our hit_or_stand function
 
