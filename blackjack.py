@@ -5,7 +5,8 @@ ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 'Nine':9, 'Ten':10, 'Jack':10,
          'Queen':10, 'King':10, 'Ace':11}
 
-playing = True #Controls main loop
+#global playing
+playing = True
 
 # Main Classes
 class Card:
@@ -94,21 +95,20 @@ def hit_or_stand(deck,hand): #had global variable 'playing'
     global playing
     playing = True
      # to control an upcoming while loop
-
-
     while True:
 
-        userchoice_ = input("\nHit or Stand?").capitalize()
+        userchoice_ = input("\nHit or Stand?").lower()
         print(userchoice_)
-        if userchoice_ == "Hit":
+        if userchoice_ == "hit":
             print('\nwe hit\n')
             hit(deck,hand)
-        elif userchoice_ == "Stand":
+            break
+        elif userchoice_ == "stand":
             print('\nwe stand\n')
             playing = False
+            break
         else:
             print("Invalid input...")
-        break
 
 def show_some(player,dealer):
 
@@ -133,33 +133,41 @@ def show_all(player,dealer):
     print(f'Dealer total: {dealer.value}')
 def player_busts(player,dealer):
 
+    global playing
     show_all(player,dealer)
     chips.lose_bet()
     print(f'\nYou busted. {chips.bet} in chips have been removed from your pot.')
     playing = False #Global var..
 def player_wins(player,dealer):
 
+    global playing
     show_all(player,dealer)
     chips.win_bet()
     print(f'\nYou Win! {chips.bet} in chips have been added to your pot.')
     playing = False #Global var..
 def dealer_busts(player,dealer):
 
+    #global playing
     show_all(player,dealer)
     chips.win_bet()
     print(f'\nDealer busted, and you win! {chips.bet} in chips have been added to your pot.')
-    playing = False #Global var..
+    #playing = False #Global var..
+
 def dealer_wins(player,dealer):
+
+    #global playing
     show_all(player,dealer)
-    chips.win_bet()
+    chips.lose_bet()
     print(f'Dealer wins. {chips.bet} in chips have been removed from your pot.')
-    playing = False #Global var..
+    #playing = False #Global var..
+
 def push():
     print('Game ends in a draw.')
 
 # Main program
+chips = Chips()
 while True: #Could I do a while true then break it if player doesn't wish to play?
-    print('Welcome to Blackjack!')
+    print('\nWelcome to Blackjack!')
 
     game_deck = Deck()
     game_deck.shuffle()
@@ -175,76 +183,64 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
     dealer_hand.add_card(game_deck.deal())
 
     # Setup of Chips
-    chips = Chips()
+    #chips = Chips()
     take_bet(chips) #my 1st prompt
 
     show_some(player_hand,dealer_hand)
 
-    if True:
-        pass
-    #print(playing)
-    while playing:  # recall this variable from our hit_or_stand function
+    playing = True
+    gameover = False
 
-        #STAND FUNCTION DOESNT WORK!
-        #INFINITE LOOP IF WE WIN OR LOSE
-        #Infinite loop at end when me and dealer bust. fix this
-        #just testing my push
-        while True: # player plays
+    while playing:  #PLAYER LOOP.
 
-            if player_hand.value == 21:
-                player_wins(player_hand,dealer_hand)
-                break
+        #Got the code to work. I didn't fully understand global variables
+        #I needed to declare "playing" as global variable in every function.
 
-            elif player_hand.value > 21:
-                player_busts(player_hand,dealer_hand)
-                break
+        if player_hand.value == 21:
+            player_wins(player_hand,dealer_hand)
+            gameover = True
 
+        elif player_hand.value > 21:
+            player_busts(player_hand,dealer_hand)
+            gameover = True
+
+        else:
             hit_or_stand(game_deck,player_hand)
             show_some(player_hand,dealer_hand)
 
-        while True: # dealer plays
+    if gameover == False:
 
-            if dealer_hand.value == 17:
+        while True: #Dealer LOOP
+
+            if dealer_hand.value == 21:
+                dealer_wins(player_hand,dealer_hand)
+                gameover = True
                 break
-
+            elif dealer_hand.value == 17: #player stands and dealer == 17
+                break
             elif dealer_hand.value > 21:
                 dealer_busts(player_hand,dealer_hand)
+                gameover = True
                 break
 
             dealer_hand.add_card(game_deck.deal())
-            show_some(player_hand,dealer_hand)
 
-    #We show final cards
-    show_all(player_hand,dealer_hand)
+    if gameover == False:
 
-    break
-
-'''
-        dealer_hand.add_card(game_deck.deal())
-        show_some(player_hand,dealer_hand)
-'''
-
-'''
-        if dealer_hand.value == 21:
+        if player_hand.value > dealer_hand.value:
+            player_wins(player_hand,dealer_hand)
+        else:
             dealer_wins(player_hand,dealer_hand)
-'''
 
+    print(chips.total)
 
-        # If player's hand exceeds 21, run player_busts() and break out of loop
+    try:
+        playagain_ = input("WOULD YOU LIKE TO PLAY AGAIN? Y/N").lower()
 
+        if playagain_ == "n":
+            break
+    except:
+        print("invalid choice")
 
-            #break
-
-    # If Player hasn't busted, play Dealer's hand until Dealer reaches 17
-
-
-        # Show all cards
-
-        # Run different winning scenarios
-
-
-    # Inform Player of their chips total
-
-    # Ask to play again
-
-        #break
+#Flawed code logic is when player immediately stands around hand value of 10
+#Dealer will try bust anyway.
