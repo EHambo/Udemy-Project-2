@@ -74,9 +74,9 @@ class Chips:
     def lose_bet(self):
         self.total -= self. bet
 
-# Functions
+# ------Functions------
 def take_bet(chips):
-
+    #Asks for user input for bet, bets are kept track by Chips Class
     while True:
         try:
             chips.bet = int(input('Enter a bet between 0 and 500!'))
@@ -87,11 +87,16 @@ def take_bet(chips):
                 print('Bet out of bounds. Try again')
         except:
             print('Bet not a number. Please choose a bet between 0 and 500')
-def hit(deck,hand):
-    hand.add_card(deck.deal())
-    hand.adjust_for_ace() #done in hit_or_stand
-def hit_or_stand(deck,hand): #had global variable 'playing'
 
+def hit(deck,hand):
+
+    #Adds a Card to Hand, uses functions of card class to add
+    hand.add_card(deck.deal())
+    hand.adjust_for_ace() #This checks if greater than 21, if so subtract 10
+
+def hit_or_stand(deck,hand):
+
+    #Asks user if they want to hit or stand.
     global playing
     playing = True
      # to control an upcoming while loop
@@ -109,9 +114,9 @@ def hit_or_stand(deck,hand): #had global variable 'playing'
             break
         else:
             print("Invalid input...")
-
 def show_some(player,dealer):
 
+    #Shows all of the players cards, but hides one of the dealers.
     print('Your hand:')
     for card_ in player.cards: print(card_)
     print(f'Your total: {player.value}')
@@ -125,21 +130,21 @@ def show_some(player,dealer):
             print(card_)
     #print(dealer.value) #I think this is hidden til end.
 def show_all(player,dealer):
-
+    #Shows all of player and dealer cards.
     for card_ in player.cards: print(card_)
     print(f'Your total: {player.value}\n')
 
     for card_ in dealer.cards: print(card_)
     print(f'Dealer total: {dealer.value}')
 def player_busts(player,dealer):
-
+    #Called when player busts. Shows all cards, subtracts bet
     global playing
     show_all(player,dealer)
     chips.lose_bet()
     print(f'\nYou busted. {chips.bet} in chips have been removed from your pot.')
     playing = False #Global var..
 def player_wins(player,dealer):
-
+    #called when player wins.  Shows all cards, adds bet
     global playing
     show_all(player,dealer)
     chips.win_bet()
@@ -147,26 +152,27 @@ def player_wins(player,dealer):
     playing = False #Global var..
 def dealer_busts(player,dealer):
 
-    #global playing
+    #Same as player bust.
     show_all(player,dealer)
     chips.win_bet()
     print(f'\nDealer busted, and you win! {chips.bet} in chips have been added to your pot.')
-    #playing = False #Global var..
 
 def dealer_wins(player,dealer):
 
-    #global playing
+    #Same as player_wins, but opposite chips command
     show_all(player,dealer)
     chips.lose_bet()
     print(f'Dealer wins. {chips.bet} in chips have been removed from your pot.')
-    #playing = False #Global var..
 
 def push():
+
+    #called when dealer draws 22.
     print('Game ends in a draw.')
 
 # Main program
-chips = Chips()
-while True: #Could I do a while true then break it if player doesn't wish to play?
+chips = Chips() #Setting up variable to keep track of bets
+
+while True: #The game Starts
     print('\nWelcome to Blackjack!')
 
     game_deck = Deck()
@@ -183,19 +189,15 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
     dealer_hand.add_card(game_deck.deal())
 
     # Setup of Chips
-    #chips = Chips()
     take_bet(chips) #my 1st prompt
-
     show_some(player_hand,dealer_hand)
 
     playing = True
     gameover = False
 
-    while playing:  #PLAYER LOOP.
+    while playing:
 
-        #Got the code to work. I didn't fully understand global variables
-        #I needed to declare "playing" as global variable in every function.
-
+        #Looping for player, playing their hand
         if player_hand.value == 21:
             player_wins(player_hand,dealer_hand)
             gameover = True
@@ -208,16 +210,30 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
             hit_or_stand(game_deck,player_hand)
             show_some(player_hand,dealer_hand)
 
-    if gameover == False:
+    if gameover == False: #Checks if player won/busted, before running
+                          #Dealer Code
 
-        while True: #Dealer LOOP
+        while True: #Dealer now plays hand.
+
+            if (dealer_hand.value > player_hand.value) \
+                & (dealer_hand.value < 21):
+                dealer_wins(player_hand,dealer_hand)
+                gameover = True
+                break
 
             if dealer_hand.value == 21:
                 dealer_wins(player_hand,dealer_hand)
                 gameover = True
                 break
+
+            elif dealer_hand.value == 22:
+                push()
+                gameover = True
+                break
+
             elif dealer_hand.value == 17: #player stands and dealer == 17
                 break
+
             elif dealer_hand.value > 21:
                 dealer_busts(player_hand,dealer_hand)
                 gameover = True
@@ -225,7 +241,8 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
 
             dealer_hand.add_card(game_deck.deal())
 
-    if gameover == False:
+    if gameover == False: #Checks if player won/busted, before running
+                          #Dealer Code
 
         if player_hand.value > dealer_hand.value:
             player_wins(player_hand,dealer_hand)
@@ -234,13 +251,20 @@ while True: #Could I do a while true then break it if player doesn't wish to pla
 
     print(chips.total)
 
-    try:
+    REPLAY = True
+    while True:
         playagain_ = input("WOULD YOU LIKE TO PLAY AGAIN? Y/N").lower()
 
-        if playagain_ == "n":
+        if playagain_ == 'n': # Ends the program.
+            REPLAY = False
             break
-    except:
-        print("invalid choice")
+        elif playagain_ == 'y':
+            REPLAY = True
+            break
+        else:
+            print('\nInvalid input...')
 
-#Flawed code logic is when player immediately stands around hand value of 10
-#Dealer will try bust anyway.
+    if REPLAY == True:
+        pass
+    if REPLAY == False:
+        break
